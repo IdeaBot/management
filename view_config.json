@@ -1,0 +1,30 @@
+{
+  "version":{
+    "api":"v0.0.1",
+    "type":"ui-json"
+  },
+  "info":{
+    "name":null,
+    "description":"Display server settings to simplify server management",
+    "help":"You can't be helped",
+    "package":"management",
+    "filepath":"addons/management/UIs/view_config.py",
+    "maintainers":[],
+    "owner": "106537989684887552"
+  },
+  "lifespan":-1,
+  "persistence":false,
+  "private":true,
+  "accessLevel":9,
+  "shouldCreate":"shouldCreate",
+  "onCreate":"onCreate",
+  "onDelete":null,
+  "onPersist":null,
+  "onReaction":{"↩":"back", "⬇":"down", "⬆":"up", "☑":"select"},
+  "defaultEmbed":{
+    "title":"Idea Configuration",
+    "description":"~\n~\n~\nStarting...\n~\n~\n~",
+    "footer":{"text":"Idea Management Tools", "icon_url":null}
+  },
+  "debug":["discord-log"]
+}
