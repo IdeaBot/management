@@ -16,6 +16,7 @@
   "persistence":false,
   "private":true,
   "accessLevel":9,
+  "directOnly":true,
   "shouldCreate":"shouldCreate",
   "onCreate":"onCreate",
   "onDelete":null,

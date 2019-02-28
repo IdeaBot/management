@@ -3,8 +3,9 @@ import re
 import discord
 import time
 
-SELECTOR_CHAR = '>'
-SELECTOR_FORMATTING = ('**', '**')
+SELECTED_FORMATTING = ('**`>`', '**')
+REGULAR_FORMATTING = ('`.`', '')
+NO_SELECTOR_FORMATTING = ('', '')
 JOIN_STR = '\n'
 PATH_SEPERATOR = ' > '
 DISPLAY_MODES = ('packages','addons', 'info')
@@ -13,17 +14,54 @@ INFO_LIST_SUFFIX = '\n'
 
 class UI(ui_class.UI):
     def shouldCreate(message):
-        return 'view config' in message.content.lower() and message.server is not None
+        return collect_args(message.content) is not None and message.server is not None
 
     def onCreate(self, message):
         # init
+        args = collect_args(message.content)
         self.history = ['packages', '', '']
-        self.verbose = re.search(r'-\bv\b', message.content) is not None
+        self.verbose = args.group(2) is not None
         self.server = message.server.id
         self.selector_index = 0
+        # generate text to display
+        if args.group(1) is not None:
+            # look for package/addon name
+            matches_found = 0
+            if args.group(1) in self.bot.packages:
+                self.history[1] = args.group(1)
+                self.display_mode_index = 1
+                matches_found = 1
+            else:
+                if args.group(1) in self.bot.commands:
+                    matches_found += 1
+                    pkg = self.bot.get_package(args.group(1),self.bot.COMMANDS)
+                    if pkg is None:
+                        matches_found -= 1
+                if args.group(1) in self.bot.reactions:
+                    matches_found += 1
+                    pkg = self.bot.get_package(args.group(1),self.bot.REACTIONS)
+                    if pkg is None:
+                        matches_found -= 1
+                if args.group(1) in self.bot.plugins:
+                    matches_found += 1
+                    pkg = self.bot.get_package(args.group(1),self.bot.PLUGINS)
+                    if pkg is None:
+                        matches_found -= 1
+                if matches_found == 1:
+                    self.selector_index = -1
+                    self.history[1] = pkg
+                    self.history[2] = args.group(1)
+                    self.display_mode_index = 2
+            if matches_found == 1:
+                # generate and display text
+                self.now_displaying = self.history[self.display_mode_index]
+                self.lines = self.get_lines_from(args.group(1), mode=DISPLAY_MODES[self.display_mode_index])
+                self.embed.description = self.make_desc()
+                self.update()
+                return
+        # fall back generate and display text
         self.now_displaying = self.history[0]
         self.display_mode_index = 0
-        # generate text to display
         self.lines = self.get_package_lines()
         self.embed.description = self.make_desc()
         self.update()
@@ -77,11 +115,19 @@ class UI(ui_class.UI):
         new_desc = ''
         new_desc += '**' + self.make_history_line() + '**\n\n'
         for i in range(len(self.lines)):
-            if i == self.selector_index:
-                new_desc += SELECTOR_CHAR + SELECTOR_FORMATTING[0]
-                new_desc += self.lines[i]+SELECTOR_FORMATTING[1]+JOIN_STR
+            if self.selector_index == -1:
+                new_desc += NO_SELECTOR_FORMATTING[0]
+                new_desc += self.lines[i]
+                new_desc += NO_SELECTOR_FORMATTING[1]
+            elif i == self.selector_index:
+                new_desc += SELECTED_FORMATTING[0]
+                new_desc += self.lines[i]
+                new_desc += SELECTED_FORMATTING[1]
             else:
-                new_desc += self.lines[i]+JOIN_STR
+                new_desc += REGULAR_FORMATTING[0]
+                new_desc += self.lines[i]
+                new_desc += REGULAR_FORMATTING[1]
+            new_desc += JOIN_STR
         if self.verbose:
             new_desc += '**__Verbose Info__**\n```'
             new_desc += '\ncursor ' + str(self.selector_index) + ', '+ str(self.display_mode_index)
@@ -192,3 +238,6 @@ class UI(ui_class.UI):
 
     def get_user_from_id(self, user_id):
         return discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
+
+def collect_args(msg_content):
+    return re.search(r'\bconfig(?:\s*for)?(?:\s*((?![\-\s])\S*))?(?:\s*(-v\b))?', msg_content, re.I)
