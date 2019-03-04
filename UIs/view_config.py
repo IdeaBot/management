@@ -240,4 +240,4 @@ class UI(ui_class.UI):
         return discord.utils.find(lambda u: u.id == user_id, self.bot.get_all_members())
 
 def collect_args(msg_content):
-    return re.search(r'\bconfig(?:\s*for)?(?:\s*((?![\-\s])\S*))?(?:\s*(-v\b))?', msg_content, re.I)
+    return re.search(r'\bconfig(?:uration)?(?:\s*for)?(?:\s*((?![\-\s])\S*))?(?:\s*(-v\b))?', msg_content, re.I)

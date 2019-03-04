@@ -6,7 +6,7 @@
   "info":{
     "name":null,
     "description":"Display server settings to simplify server management",
-    "help":"You can't be helped",
+    "help":"**Usage**\n```@Idea config [<name>]```\nWhere\n**`<name>`** is the package/add-on name\n\n**NOTE:** items surrounded by `[` and `]` are optional.\n\n**Example**\n`@Idea show me the configuration for pin`\n`@Idea config spoiler`",
     "package":"management",
     "filepath":"addons/management/UIs/view_config.py",
     "maintainers":[],
